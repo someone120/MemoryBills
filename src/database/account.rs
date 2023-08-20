@@ -9,6 +9,7 @@ pub struct Account{
 }
 /// add a new account
 /// 
+/// 
 pub fn add_account(conn:&Connection,name:&str,currency:&str)->Result<()>{
     conn.execute(
         "INSERT INTO ACCOUNT (name,currency,balance) VALUES (?1,?2,?3)",
