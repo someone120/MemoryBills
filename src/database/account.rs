@@ -42,6 +42,11 @@ pub fn read_account(conn:&Connection,id:i32)->Result<Vec<Account>>{
     Ok(result)
 }
 
+pub fn del_account(conn:&Connection,id:i32)-> Result<()>{
+    conn.execute("DELETE FROM ACCOUNT WHERE id=?1", params![id])?;
+    Ok(())
+}
+
 pub fn recalc_account(conn:&Connection,id:i32){
     todo!()
 }
@@ -77,7 +82,7 @@ mod tests {
         init(&conn)?;
         add_account(&conn, "a", "b")?;
         
-        read_account(&conn, get_last_id(&conn)?);
+        read_account(&conn, get_last_id(&conn)?)?;
 
         Ok(())
     }
@@ -90,5 +95,18 @@ mod tests {
         assert_eq!(1,get_last_id(&conn)?);
         Ok(())
 
+    }
+    #[test]
+    fn test_delete()->Result<()>{
+
+        let conn = Connection::open_in_memory()?;
+        init(&conn)?;
+        add_account(&conn, "a", "b")?;
+        add_account(&conn, "a", "b")?;
+        let id=get_last_id(&conn)?;
+        del_account(&conn, id);
+        
+        assert_ne!(id,get_last_id(&conn)?);
+        Ok(())
     }
 }
