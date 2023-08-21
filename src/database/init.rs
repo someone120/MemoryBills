@@ -43,6 +43,7 @@ fn init_transaction(conn: &Connection) -> Result<()> {
         "
     CREATE TABLE TRANS(
         id INTEGER PRIMARY KEY autoincrement,
+        time TEXT NOT NULL,
         extra VARCHAR(255)
     )
     ",
@@ -115,8 +116,8 @@ mod tests {
         let conn = Connection::open_in_memory()?;
         init_transaction(&conn)?;
         conn.execute(
-            "INSERT INTO TRANS (id,extra) VALUES (?1,?2)",
-            (0,"CNY"),
+            "INSERT INTO TRANS (id,time,extra) VALUES (?1,?2,?3)",
+            (0,"2023-08-21","CNY"),
         )?;
         let mut stmt =
             conn.prepare("SELECT id,extra FROM TRANS")?;
