@@ -25,3 +25,16 @@ pub fn get_transactions(conn: &Connection, id: &str) {
 pub fn change_extra(conn: &Connection, id: &str, extra: &str) {
     todo!()
 }
+
+#[cfg(test)]
+mod tests{
+    #[test]
+    fn test_add_transaction(){
+        todo!()
+    }
+
+    #[test]
+    fn test_del_transaction(){
+
+    }
+}
