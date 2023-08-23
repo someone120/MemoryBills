@@ -11,7 +11,7 @@ fn init_account(conn: &Connection) -> Result<()> {
     conn.execute(
         "
     CREATE TABLE ACCOUNT(
-        id INTEGER PRIMARY KEY autoincrement,
+        id TEXT PRIMARY KEY ,
         name VARCHAR(255) NOT NULL,
         currency VARCHAR(255) NOT NULL,
         balance float NOT NULL
@@ -26,7 +26,7 @@ fn init_details(conn: &Connection) -> Result<()> {
     conn.execute(
         "
     CREATE TABLE DETAIL(
-        id INTEGER PRIMARY KEY autoincrement,
+        id TEXT PRIMARY KEY,
         trans_id INTEGER NOT NULL,
         account_id INTEGER NOT NULL,
         currency VARCHAR(255) NOT NULL,
@@ -42,7 +42,7 @@ fn init_transaction(conn: &Connection) -> Result<()> {
     conn.execute(
         "
     CREATE TABLE TRANS(
-        id INTEGER PRIMARY KEY autoincrement,
+        id TEXT PRIMARY KEY,
         time TEXT NOT NULL,
         extra VARCHAR(255)
     )
