@@ -27,8 +27,8 @@ fn init_details(conn: &Connection) -> Result<()> {
         "
     CREATE TABLE DETAIL(
         id TEXT PRIMARY KEY,
-        trans_id INTEGER NOT NULL,
-        account_id INTEGER NOT NULL,
+        trans_id TEXT NOT NULL,
+        account_id TEXT NOT NULL,
         currency VARCHAR(255) NOT NULL,
         balance float NOT NULL
     )
@@ -124,7 +124,8 @@ mod tests {
         let mut iter = stmt.query_map([], |row| {
             Ok(Transaction {
                 id: row.get(0)?,
-                extra: row.get(1)?,
+                date:row.get(1)?,
+                extra: row.get(2)?,
             })
         })?;
 

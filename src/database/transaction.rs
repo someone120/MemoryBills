@@ -1,6 +1,4 @@
-use std::time::TryFromFloatSecsError;
-
-use chrono::{Date, NaiveDate};
+use chrono::{Date, DateTime, NaiveDate};
 use rusqlite::{params, Connection, Result};
 use uuid::Uuid;
 
@@ -11,11 +9,15 @@ pub struct Transaction {
     pub extra: String,
 }
 
-pub fn add_transaction(conn: &Connection, date: NaiveDate, extra: &str) -> Result<()> {
+pub fn add_transaction(conn: &Connection, date: DateTime<chrono::Utc>, extra: &str) -> Result<()> {
     let id = Uuid::new_v4().to_string();
     conn.execute(
         "INSERT INTO TRANS (id,time,extra) VALUES (?1,?2,?3)",
-        (id.as_str(), date.format("%Y-%m-%d %H:%").to_string(), extra),
+        (
+            id.as_str(),
+            date.format("%Y-%m-%d %H:%M").to_string().as_str(),
+            extra,
+        ),
     )?;
     Ok(())
 }
@@ -25,9 +27,9 @@ pub fn del_transaction(conn: &Connection, id: &str) -> Result<()> {
     Ok(())
 }
 
-pub fn get_transactions(conn: &Connection, id: &str) -> Result<Vec<Transaction>> {
-    let mut stmt = conn.prepare("SELECT * FROM TRANS WHERE id=?1")?;
-    let iter = stmt.query_map(params![id], |row| {
+pub fn get_transactions(conn: &Connection) -> Result<Vec<Transaction>> {
+    let mut stmt = conn.prepare("SELECT * FROM TRANS")?;
+    let iter = stmt.query_map([], |row| {
         Ok(Transaction {
             id: row.get(0)?,
             date: row.get(1)?,
@@ -51,11 +53,55 @@ pub fn change_extra(conn: &Connection, id: &str, extra: &str) -> Result<()> {
 
 #[cfg(test)]
 mod tests {
+
+    use crate::database::init;
+
+    use super::*;
     #[test]
-    fn test_add_transaction() {
-        todo!()
+    fn test_add_transaction() -> Result<()> {
+        let conn = Connection::open_in_memory()?;
+        let date = chrono::Utc::now();
+        init::init(&conn)?;
+        add_transaction(&conn, date, "1")?;
+        let trans = get_transactions(&conn)?;
+
+        assert_eq!(1,trans.len());
+        Ok(())
     }
 
     #[test]
-    fn test_del_transaction() {}
+    fn test_del_transaction() -> Result<()>{
+        let conn = Connection::open_in_memory()?;
+        let date = chrono::Utc::now();
+        init::init(&conn)?;
+        add_transaction(&conn, date, "1")?;
+        add_transaction(&conn, date, "2")?;
+
+        let trans = get_transactions(&conn)?;
+
+        assert_eq!(2,trans.len());
+
+        del_transaction(&conn, &trans[0].id)?;
+
+        let trans = get_transactions(&conn)?;
+        assert_eq!(1,trans.len());
+        Ok(())
+    }
+
+    #[test]
+    fn test_change_extra()->Result<()>{
+        let conn = Connection::open_in_memory()?;
+        let date = chrono::Utc::now();
+        init::init(&conn)?;
+        add_transaction(&conn, date, "unchange")?;
+        let trans = get_transactions(&conn)?;
+
+        assert_eq!(1,trans.len());
+
+        change_extra(&conn, &trans[0].id, "changed")?;
+
+        let trans = get_transactions(&conn)?;
+        assert_eq!("changed",trans[0].extra);
+        Ok(())
+    }
 }
