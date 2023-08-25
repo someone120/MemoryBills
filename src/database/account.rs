@@ -9,9 +9,10 @@ pub struct Account {
     pub currency: String,
 }
 /// add a new account
-pub fn add_account(conn: &Connection, name: &str, currency: &str) -> Result<()> {
+pub fn add_account(conn: &Connection, name: &str, currency: &str) -> Result<String> {
     let id = Uuid::new_v4().to_string();
-    add_account_with_id(conn, name, currency, id.as_str())
+    add_account_with_id(conn, name, currency, id.as_str())?;
+    Ok(id)
 }
 
 fn add_account_with_id(conn: &Connection, name: &str, currency: &str, id: &str) -> Result<()> {
@@ -62,6 +63,14 @@ pub fn get_accounts(conn: &Connection) -> Result<Vec<Account>> {
         result.push(i?)
     }
     Ok(result)
+}
+
+pub fn update_account(conn: &Connection, account: &Account) -> Result<()> {
+    conn.execute(
+        "UPDATE ACCOUNT SET name=?1,currency=?2,balance=?3 WHERE id=?4",
+        (account.name.clone(), account.currency.clone(), account.balance, account.id.clone()),
+    )?;
+    Ok(())
 }
 
 #[cfg(test)]

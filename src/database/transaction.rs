@@ -9,7 +9,7 @@ pub struct Transaction {
     pub extra: String,
 }
 
-pub fn add_transaction(conn: &Connection, date: DateTime<chrono::Utc>, extra: &str) -> Result<()> {
+pub fn add_transaction(conn: &Connection, date: DateTime<chrono::Utc>, extra: &str) -> Result<String> {
     let id = Uuid::new_v4().to_string();
     conn.execute(
         "INSERT INTO TRANS (id,time,extra) VALUES (?1,?2,?3)",
@@ -19,7 +19,7 @@ pub fn add_transaction(conn: &Connection, date: DateTime<chrono::Utc>, extra: &s
             extra,
         ),
     )?;
-    Ok(())
+    Ok(id)
 }
 
 pub fn del_transaction(conn: &Connection, id: &str) -> Result<()> {
