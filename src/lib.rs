@@ -1,6 +1,6 @@
 use database::{
     account::{self, Account},
-    details,
+    details, transaction,
 };
 use error::Error;
 use rusqlite::Connection;
@@ -22,8 +22,19 @@ pub fn recalcute(conn: &Connection) -> Result<(), Error> {
     Ok(())
 }
 
-pub fn verification(conn: &Connection) {
-    todo!()
+pub fn verification(conn: &Connection) -> Result<(), Error> {
+    let trans = transaction::get_transactions(conn)?;
+    for tran in trans {
+        let details = details::get_details_by_trans(conn, tran.id.as_str())?;
+        let mut balance = 0.0;
+        for i in details {
+            balance += i.balance;
+        }
+        if balance != 0.0 {
+            return Err(Error::DetailSumNotZero(tran.id, balance));
+        }
+    }
+    Ok(())
 }
 
 #[cfg(test)]
